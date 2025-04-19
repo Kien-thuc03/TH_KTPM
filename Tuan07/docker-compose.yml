@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # MongoDB container
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # API Gateway
+  api-gateway:
+    build: ./ApiGateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PRODUCT_SERVICE_URL=http://product-service:3000
+      - CUSTOMER_SERVICE_URL=http://customer-service:3001
+      - ORDER_SERVICE_URL=http://order-service:3002
+      - PAYMENT_SERVICE_URL=http://payment-service:3003
+      - INVENTORY_SERVICE_URL=http://inventory-service:3004
+      - SHIPPING_SERVICE_URL=http://shipping-service:3005
+    depends_on:
+      - product-service
+      - customer-service
+      - order-service
+      - payment-service
+      - inventory-service
+      - shipping-service
+
+  # Product Service
+  product-service:
+    build: ./ProductService
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/product-service
+    depends_on:
+      - mongodb
+
+  # Customer Service
+  customer-service:
+    build: ./CustomerService
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/customer-service
+    depends_on:
+      - mongodb
+
+  # Order Service
+  order-service:
+    build: ./OrderService
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/order-service
+    depends_on:
+      - mongodb
+
+  # Payment Service
+  payment-service:
+    build: ./PaymentService
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/payment-service
+    depends_on:
+      - mongodb
+
+  # Inventory Service
+  inventory-service:
+    build: ./InventoryService
+    ports:
+      - "3004:3004"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/inventory-service
+    depends_on:
+      - mongodb
+
+  # Shipping Service
+  shipping-service:
+    build: ./ShippingService
+    ports:
+      - "3005:3005"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/shipping-service
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb_data:
